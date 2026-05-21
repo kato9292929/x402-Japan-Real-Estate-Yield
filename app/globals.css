@@ -545,6 +545,114 @@ a {
   padding: 3px 9px;
 }
 
+/* ---------------------------------------------------- chain selector */
+
+.payment-explorer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.chain-selector {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cs-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cs-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-width: 124px;
+}
+
+.cs-chains,
+.cs-tokens {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cs-chain,
+.cs-token {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.cs-chain:hover,
+.cs-token:hover {
+  border-color: var(--gold-dim);
+  color: var(--text);
+}
+
+.cs-chain.active,
+.cs-token.active {
+  background: rgba(200, 169, 110, 0.12);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
+.cs-token.disabled,
+.cs-token.disabled:hover {
+  opacity: 0.32;
+  cursor: not-allowed;
+  color: var(--muted-2);
+  border-color: var(--border);
+}
+
+.cs-banner {
+  font-size: 0.84rem;
+  color: var(--gold);
+  background: rgba(200, 169, 110, 0.07);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 5px;
+  padding: 10px 14px;
+}
+
+.cs-endpoint {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.cs-endpoint strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.cs-endpoint code {
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--gold-bright);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 7px;
+}
+
 @media (max-width: 880px) {
   .area-grid,
   .pricing-grid {

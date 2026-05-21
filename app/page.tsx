@@ -1,22 +1,10 @@
-import { mapAreas, type AreaBaseline } from "@/lib/areas";
-import {
-  heuristicScore,
-  recommendationJa,
-  scoreColor,
-} from "@/lib/score";
+import { mapAreas } from "@/lib/areas";
+import { heuristicScore, scoreColor } from "@/lib/score";
 import { WalletButton } from "@/components/WalletButton";
+import { PaymentExplorer } from "@/components/PaymentExplorer";
 
 const pct = (n: number, digits = 1): string =>
   `${(n * 100).toFixed(digits)}%`;
-
-const signedPct = (n: number): string =>
-  `${n >= 0 ? "+" : ""}${(n * 100).toFixed(1)}%`;
-
-const trendJa: Record<AreaBaseline["populationTrend"], string> = {
-  GROWING: "増加",
-  STABLE: "横ばい",
-  DECLINING: "減少",
-};
 
 const PRICING = [
   {
@@ -56,6 +44,13 @@ const API_ROWS = [
   { method: "GET", path: "/api/realestate/weekly", price: "$2.00" },
 ];
 
+const CHAIN_ROWS = [
+  { chain: "Base", token: "USDC", suffix: "（既定 / route.ts）" },
+  { chain: "Solana", token: "USDC", suffix: "/solana" },
+  { chain: "Polygon", token: "USDC · JPYC", suffix: "/polygon" },
+  { chain: "BNB Chain", token: "USDT", suffix: "/bnb" },
+];
+
 export default function Home() {
   const areas = mapAreas();
 
@@ -90,8 +85,8 @@ export default function Home() {
                 <div className="l">分析対象エリア</div>
               </div>
               <div className="hero-stat">
-                <div className="v">x402</div>
-                <div className="l">オンチェーン従量課金</div>
+                <div className="v">4</div>
+                <div className="l">対応決済チェーン</div>
               </div>
               <div className="hero-stat">
                 <div className="v">Claude</div>
@@ -209,84 +204,13 @@ export default function Home() {
               <span className="section-kicker">Area Coverage</span>
               <h2 className="section-title">エリア別利回りサマリー</h2>
               <p className="section-desc">
+                決済ネットワーク（Solana / Base / Polygon / BNB Chain）を選択し、
                 各エリアの「詳細分析」から x402 課金（$0.30）で Claude による
                 総合利回り分析レポートを取得できます。
               </p>
             </div>
 
-            <div className="area-grid">
-              {areas.map((area) => {
-                const { score, recommendation } = heuristicScore(area);
-                const color = scoreColor(score);
-                return (
-                  <article key={area.key} className="area-card">
-                    <div className="area-card-top">
-                      <div>
-                        <div className="area-name">{area.nameJa}</div>
-                        <div className="area-name-en">{area.nameEn}</div>
-                      </div>
-                      <span className="area-region">{area.region}</span>
-                    </div>
-
-                    <div className="area-yield">
-                      <span className="big">{pct(area.grossYield)}</span>
-                      <span className="cap">表面利回り</span>
-                    </div>
-
-                    <div className="area-metrics">
-                      <div className="metric">
-                        <div className="m-label">空室率</div>
-                        <div className="m-value">
-                          {pct(area.vacancyRate)}
-                        </div>
-                      </div>
-                      <div className="metric">
-                        <div className="m-label">価格変動 1Y</div>
-                        <div
-                          className={`m-value ${area.priceChange1Y >= 0 ? "pos" : "neg"}`}
-                        >
-                          {signedPct(area.priceChange1Y)}
-                        </div>
-                      </div>
-                      <div className="metric">
-                        <div className="m-label">投資スコア</div>
-                        <div className="m-value" style={{ color }}>
-                          {score.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="score-bar">
-                      <i
-                        style={{
-                          width: `${score * 100}%`,
-                          background: color,
-                        }}
-                      />
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 8,
-                        fontSize: "0.74rem",
-                        color: "var(--muted)",
-                      }}
-                    >
-                      人口動態: {trendJa[area.populationTrend]} ・ 判断:{" "}
-                      {recommendationJa(recommendation)}
-                    </div>
-
-                    <a
-                      className="area-cta"
-                      href={`/api/realestate/yield?area=${area.key}`}
-                    >
-                      <span>詳細分析</span>
-                      <span className="price">$0.30</span>
-                    </a>
-                  </article>
-                );
-              })}
-            </div>
+            <PaymentExplorer />
           </div>
         </section>
 
@@ -296,8 +220,8 @@ export default function Home() {
               <span className="section-kicker">Pricing</span>
               <h2 className="section-title">料金プラン</h2>
               <p className="section-desc">
-                すべての API は x402 プロトコルで都度課金（Base ネットワークの
-                USDC 決済）。APIキー不要、リクエスト単位で支払います。
+                すべての API は x402 プロトコルで都度課金。APIキー不要、
+                リクエスト単位で支払います。
               </p>
             </div>
 
@@ -310,6 +234,34 @@ export default function Home() {
                   <span className="endpoint">{p.endpoint}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="chains">
+          <div className="wrap">
+            <div className="section-head">
+              <span className="section-kicker">Multi-chain Payment</span>
+              <h2 className="section-title">対応決済チェーン</h2>
+              <p className="section-desc">
+                各エンドポイントにチェーン別サブルートを用意。Base は既定の
+                route.ts、その他は /solana・/polygon・/bnb で課金します。
+              </p>
+            </div>
+
+            <div className="api-list">
+              {CHAIN_ROWS.map((row) => (
+                <div key={row.chain} className="api-row">
+                  <span className="api-method">{row.chain}</span>
+                  <span className="api-path">{row.token}</span>
+                  <span className="api-price">{row.suffix}</span>
+                </div>
+              ))}
+              <p className="api-note">
+                Solana・BNB Chain は手動 402（x402 仕様準拠）、Base・Polygon は
+                x402-next の withX402 で実装。Polygon は ?token=jpyc で JPYC 決済に
+                対応します。
+              </p>
             </div>
           </div>
         </section>
@@ -358,7 +310,7 @@ export default function Home() {
             <span className="data-tag">国土交通省 不動産価格指数</span>
             <span className="data-tag">e-Stat 政府統計</span>
             <span className="data-tag">Claude AI 分析</span>
-            <span className="data-tag">x402 / Base USDC</span>
+            <span className="data-tag">x402 マルチチェーン決済</span>
           </div>
           <div className="footer-meta">
             <span>x402 JAPAN REAL ESTATE YIELD</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import "@rainbow-me/rainbowkit/styles.css";
+import dynamic from "next/dynamic";
 import { useState, type ReactNode } from "react";
 import {
   RainbowKitProvider,
@@ -8,14 +9,20 @@ import {
   getDefaultConfig,
 } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
-import { base } from "wagmi/chains";
+import { base, polygon, bsc } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Solana ウォレットプロバイダーはブラウザ専用のため ssr:false で動的読み込み。
+const SolanaWalletProviders = dynamic(
+  () => import("@/components/SolanaWalletProviders"),
+  { ssr: false },
+);
 
 const config = getDefaultConfig({
   appName: "x402 Japan Real Estate Yield",
   projectId:
     process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "placeholder",
-  chains: [base],
+  chains: [base, polygon, bsc],
   ssr: true,
 });
 
@@ -33,7 +40,7 @@ export function Providers({ children }: { children: ReactNode }) {
             overlayBlur: "small",
           })}
         >
-          {children}
+          <SolanaWalletProviders>{children}</SolanaWalletProviders>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
