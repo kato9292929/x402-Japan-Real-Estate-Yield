@@ -1,6 +1,7 @@
 import { mapAreas } from "@/lib/areas";
 import { heuristicScore, scoreColor } from "@/lib/score";
 import { WalletButton } from "@/components/WalletButton";
+import { SolanaWalletButton } from "@/components/SolanaWalletButton";
 import { PaymentExplorer } from "@/components/PaymentExplorer";
 
 const pct = (n: number, digits = 1): string =>
@@ -62,7 +63,10 @@ export default function Home() {
             <span className="brand-badge">x402</span>
             <span className="brand-name">REAL ESTATE YIELD</span>
           </div>
-          <WalletButton />
+          <div className="header-wallets">
+            <SolanaWalletButton />
+            <WalletButton />
+          </div>
         </div>
       </header>
 

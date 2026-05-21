@@ -380,14 +380,18 @@ a {
 
 .area-cta {
   margin-top: 18px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 10px 14px;
+  font-family: inherit;
   font-size: 0.85rem;
   color: var(--gold);
+  background: transparent;
+  cursor: pointer;
   transition: background 0.2s ease;
 }
 
@@ -651,6 +655,282 @@ a {
   border: 1px solid var(--border);
   border-radius: 3px;
   padding: 2px 7px;
+}
+
+/* ------------------------------------------------- header wallets */
+
+.header-wallets {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.header-wallets .wallet-adapter-button {
+  height: 40px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0 14px;
+}
+
+.header-wallets .wallet-adapter-button:not([disabled]):hover {
+  background: rgba(200, 169, 110, 0.1);
+  border-color: var(--gold-dim);
+}
+
+.header-wallets .wallet-adapter-button-trigger {
+  background: var(--panel-2);
+}
+
+.area-card.selected {
+  border-color: var(--gold);
+}
+
+/* ------------------------------------------------- analysis panel */
+
+.analysis-panel {
+  border: 1px solid var(--gold-dim);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 24px 26px;
+}
+
+.ap-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.ap-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.ap-title {
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.ap-close,
+.ap-btn {
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.ap-close:hover,
+.ap-btn:hover {
+  border-color: var(--gold-dim);
+  color: var(--text);
+}
+
+.ap-btn.primary {
+  background: var(--gold);
+  color: var(--bg);
+  border-color: var(--gold);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.ap-btn.primary:hover {
+  background: var(--gold-bright);
+  color: var(--bg);
+}
+
+.ap-btn.primary:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.ap-muted {
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.ap-error,
+.ap-pay {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ap-error p {
+  color: var(--red);
+  font-size: 0.88rem;
+}
+
+.ap-pay-head {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gold-bright);
+}
+
+.ap-pay-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.ap-pay-grid div {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-2);
+  padding: 10px 12px;
+}
+
+.ap-pay-grid dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.ap-pay-grid dd {
+  margin-top: 4px;
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.ap-payerr {
+  font-size: 0.84rem;
+  color: var(--red);
+}
+
+.ap-score-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ap-score {
+  display: flex;
+  flex-direction: column;
+}
+
+.ap-score-v {
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--gold-bright);
+}
+
+.ap-score-l {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.ap-rec {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--gold);
+  border-radius: 4px;
+  padding: 6px 14px;
+}
+
+.ap-conf {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.ap-analysis {
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--text);
+  border-left: 2px solid var(--gold-dim);
+  padding-left: 16px;
+}
+
+.ap-metrics {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ap-metrics div {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-2);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.apm-l {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.apm-v {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.ap-lists {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.apl-h {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.ap-lists ul {
+  margin-top: 8px;
+  padding-left: 18px;
+}
+
+.ap-lists li {
+  font-size: 0.86rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.ap-result .ap-muted {
+  margin-top: 16px;
+}
+
+@media (max-width: 560px) {
+  .ap-pay-grid,
+  .ap-metrics,
+  .ap-lists {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 880px) {

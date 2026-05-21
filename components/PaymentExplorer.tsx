@@ -7,11 +7,11 @@ import {
   DEFAULT_CHAIN,
   TOKEN_LABEL,
   chainByKey,
-  yieldEndpoint,
   type ChainKey,
   type TokenKey,
 } from "@/lib/paymentChains";
 import { ChainSelector } from "@/components/ChainSelector";
+import { AnalysisPanel } from "@/components/AnalysisPanel";
 
 const pct = (n: number, digits = 1): string =>
   `${(n * 100).toFixed(digits)}%`;
@@ -31,6 +31,7 @@ export function PaymentExplorer() {
   const [token, setToken] = useState<TokenKey>(
     chainByKey(DEFAULT_CHAIN).tokens[0],
   );
+  const [selected, setSelected] = useState<AreaBaseline | null>(null);
 
   function handleChainChange(next: ChainKey) {
     setChain(next);
@@ -59,8 +60,12 @@ export function PaymentExplorer() {
         {areas.map((area) => {
           const { score, recommendation } = heuristicScore(area);
           const color = scoreColor(score);
+          const isSelected = selected?.key === area.key;
           return (
-            <article key={area.key} className="area-card">
+            <article
+              key={area.key}
+              className={`area-card${isSelected ? " selected" : ""}`}
+            >
               <div className="area-card-top">
                 <div>
                   <div className="area-name">{area.nameJa}</div>
@@ -110,17 +115,28 @@ export function PaymentExplorer() {
                 {recommendationJa(recommendation)}
               </div>
 
-              <a
+              <button
+                type="button"
                 className="area-cta"
-                href={yieldEndpoint(chain, token, area.key)}
+                onClick={() => setSelected(isSelected ? null : area)}
               >
-                <span>詳細分析 ・ {active.label}</span>
+                <span>{isSelected ? "分析を閉じる" : "詳細分析"} ・ {active.label}</span>
                 <span className="price">$0.30</span>
-              </a>
+              </button>
             </article>
           );
         })}
       </div>
+
+      {selected ? (
+        <AnalysisPanel
+          key={`${selected.key}-${chain}-${token}`}
+          area={selected}
+          chain={chain}
+          token={token}
+          onClose={() => setSelected(null)}
+        />
+      ) : null}
     </div>
   );
 }
