@@ -7,7 +7,7 @@ import type { RouteConfig } from "x402-next";
  */
 
 const JPYC_CONTRACT = (process.env.NEXT_PUBLIC_JPYC_CONTRACT ??
-  "0x431D5dfF03120AFA4bDf332c61A6e1766eF37BF") as `0x${string}`;
+  "0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB") as `0x${string}`;
 
 const JPYC_DECIMALS = 18;
 /** JPYC 建て金額の換算に用いる想定レート（1 USD ≒ 150 JPY）。 */
