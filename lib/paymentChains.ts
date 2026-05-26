@@ -4,10 +4,9 @@ export type TokenKey = "usdc" | "jpyc" | "usdt";
 export interface PaymentChain {
   key: ChainKey;
   label: string;
+  /** CAIP-2 ネットワーク識別子。 */
   network: string;
-  /** 利用可能なトークン。 */
   tokens: TokenKey[];
-  /** タブは表示するが選択不可（グレーアウト）のトークン。 */
   disabledTokens: TokenKey[];
   banner: string | null;
   /** API ルートのサブパス（Base は既存 route.ts なので空）。 */
@@ -20,7 +19,7 @@ export const PAYMENT_CHAINS: PaymentChain[] = [
   {
     key: "solana",
     label: "Solana",
-    network: "solana-mainnet",
+    network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
     tokens: ["usdc"],
     disabledTokens: ["jpyc"],
     banner: "SolanaネットワークではUSDC決済のみご利用いただけます",
@@ -29,7 +28,7 @@ export const PAYMENT_CHAINS: PaymentChain[] = [
   {
     key: "base",
     label: "Base",
-    network: "base",
+    network: "eip155:8453",
     tokens: ["usdc", "jpyc"],
     disabledTokens: [],
     banner: null,
@@ -38,7 +37,7 @@ export const PAYMENT_CHAINS: PaymentChain[] = [
   {
     key: "polygon",
     label: "Polygon",
-    network: "polygon",
+    network: "eip155:137",
     tokens: ["usdc", "jpyc"],
     disabledTokens: [],
     banner: null,
@@ -62,9 +61,7 @@ export const TOKEN_LABEL: Record<TokenKey, string> = {
 };
 
 export function chainByKey(key: ChainKey): PaymentChain {
-  return (
-    PAYMENT_CHAINS.find((c) => c.key === key) ?? PAYMENT_CHAINS[0]
-  );
+  return PAYMENT_CHAINS.find((c) => c.key === key) ?? PAYMENT_CHAINS[0];
 }
 
 /** 選択されたチェーン・トークンに応じた利回り API のリンクを組み立てる。 */

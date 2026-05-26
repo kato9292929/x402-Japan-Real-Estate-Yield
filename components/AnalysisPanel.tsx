@@ -1,9 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useAccount, useSwitchChain, useWalletClient } from "wagmi";
-import { publicActions } from "viem";
-import { wrapFetchWithPayment } from "x402-fetch";
 import type { AreaBaseline } from "@/lib/areas";
 import {
   chainByKey,
@@ -42,6 +39,11 @@ interface PaymentAccept {
   asset?: string;
 }
 
+interface PaymentRequired402 {
+  x402Version?: number;
+  accepts?: PaymentAccept[];
+}
+
 interface AnalysisPanelProps {
   area: AreaBaseline;
   chain: ChainKey;
@@ -51,10 +53,7 @@ interface AnalysisPanelProps {
 
 type Status = "loading" | "result" | "payment" | "error";
 
-const EVM_CHAIN_ID: Partial<Record<ChainKey, number>> = {
-  base: 8453,
-  polygon: 137,
-};
+const EVM_CHAINS: ChainKey[] = ["base", "polygon"];
 
 const RECOMMENDATION_JA: Record<string, string> = {
   ACCUMULATE: "積極取得",
@@ -77,25 +76,18 @@ export function AnalysisPanel({
 }: AnalysisPanelProps) {
   const [status, setStatus] = useState<Status>("loading");
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [accept, setAccept] = useState<PaymentAccept | null>(null);
+  const [body402, setBody402] = useState<PaymentRequired402 | null>(null);
   const [error, setError] = useState<string>("");
-  const [paying, setPaying] = useState(false);
-  const [payError, setPayError] = useState<string>("");
-
-  const evmChainId = EVM_CHAIN_ID[chain];
-  const isEvm = evmChainId !== undefined;
-  const { isConnected, chainId: activeChainId } = useAccount();
-  const { data: walletClient } = useWalletClient({ chainId: evmChainId });
-  const { switchChainAsync } = useSwitchChain();
 
   const chainLabel = chainByKey(chain).label;
+  const endpoint = yieldEndpoint(chain, token, area.key);
+  const isEvm = EVM_CHAINS.includes(chain);
 
   const probe = useCallback(async () => {
     setStatus("loading");
     setError("");
-    setPayError("");
     try {
-      const res = await fetch(yieldEndpoint(chain, token, area.key), {
+      const res = await fetch(endpoint, {
         headers: { Accept: "application/json" },
         cache: "no-store",
       });
@@ -105,10 +97,10 @@ export function AnalysisPanel({
         return;
       }
       if (res.status === 402) {
-        const body = (await res.json().catch(() => null)) as {
-          accepts?: PaymentAccept[];
-        } | null;
-        setAccept(body?.accepts?.[0] ?? null);
+        const json = (await res.json().catch(() => null)) as
+          | PaymentRequired402
+          | null;
+        setBody402(json);
         setStatus("payment");
         return;
       }
@@ -117,39 +109,13 @@ export function AnalysisPanel({
       setError(errMsg(e));
       setStatus("error");
     }
-  }, [area.key, chain, token]);
+  }, [endpoint]);
 
   useEffect(() => {
     void probe();
   }, [probe]);
 
-  async function payWithEvmWallet() {
-    if (!walletClient || evmChainId === undefined) return;
-    setPaying(true);
-    setPayError("");
-    try {
-      if (activeChainId !== evmChainId) {
-        await switchChainAsync({ chainId: evmChainId });
-      }
-      const signer = walletClient.extend(publicActions);
-      const fetchWithPayment = wrapFetchWithPayment(
-        fetch,
-        signer as Parameters<typeof wrapFetchWithPayment>[1],
-        BigInt(10000000),
-      );
-      const res = await fetchWithPayment(
-        yieldEndpoint(chain, token, area.key),
-        { headers: { Accept: "application/json" } },
-      );
-      if (!res.ok) throw new Error(`決済後の応答エラー HTTP ${res.status}`);
-      setResult((await res.json()) as AnalysisResult);
-      setStatus("result");
-    } catch (e) {
-      setPayError(errMsg(e));
-    } finally {
-      setPaying(false);
-    }
-  }
+  const accepts = body402?.accepts ?? [];
 
   return (
     <div className="analysis-panel">
@@ -176,55 +142,58 @@ export function AnalysisPanel({
         </div>
       ) : null}
 
-      {status === "payment" && accept ? (
+      {status === "payment" ? (
         <div className="ap-pay">
-          <p className="ap-pay-head">x402 決済が必要です ・ $0.30</p>
-          <dl className="ap-pay-grid">
-            <div>
-              <dt>ネットワーク</dt>
-              <dd>{accept.network ?? "-"}</dd>
-            </div>
-            <div>
-              <dt>金額（base units）</dt>
-              <dd>{accept.maxAmountRequired ?? "-"}</dd>
-            </div>
-            <div>
-              <dt>アセット</dt>
-              <dd>{accept.asset ? truncate(accept.asset) : "-"}</dd>
-            </div>
-            <div>
-              <dt>送金先</dt>
-              <dd>{accept.payTo ? truncate(accept.payTo) : "未設定"}</dd>
-            </div>
-          </dl>
+          <p className="ap-pay-head">
+            x402 決済が必要です
+            {body402?.x402Version ? ` ・ v${body402.x402Version}` : null}
+          </p>
 
-          {isEvm ? (
-            isConnected ? (
-              <button
-                type="button"
-                className="ap-btn primary"
-                onClick={() => payWithEvmWallet()}
-                disabled={paying}
-              >
-                {paying
-                  ? "決済処理中…"
-                  : `${chainLabel} ウォレットで決済して分析`}
-              </button>
-            ) : (
-              <p className="ap-muted">
-                右上の「ウォレット接続」から {chainLabel} 対応ウォレットを
-                接続すると、ブラウザから x402 決済を実行できます。
-              </p>
-            )
+          {accepts.length === 0 ? (
+            <p className="ap-muted">決済要件の取得に失敗しました。</p>
           ) : (
-            <p className="ap-muted">
-              {chainLabel} は手動 402 フローです。x402 対応クライアント
-              （または接続済みウォレット）で X-PAYMENT を付与して再送して
-              ください。決済の確定にはファシリテーター設定が必要です。
-            </p>
+            <ul className="ap-accepts">
+              {accepts.map((a, i) => (
+                <li key={i}>
+                  <dl className="ap-pay-grid">
+                    <div>
+                      <dt>ネットワーク</dt>
+                      <dd>{a.network ?? "-"}</dd>
+                    </div>
+                    <div>
+                      <dt>金額（base units）</dt>
+                      <dd>{a.maxAmountRequired ?? "-"}</dd>
+                    </div>
+                    <div>
+                      <dt>アセット</dt>
+                      <dd>{a.asset ? truncate(a.asset) : "-"}</dd>
+                    </div>
+                    <div>
+                      <dt>送金先</dt>
+                      <dd>{a.payTo ? truncate(a.payTo) : "未設定"}</dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ul>
           )}
 
-          {payError ? <p className="ap-payerr">決済エラー: {payError}</p> : null}
+          {isEvm ? (
+            <a
+              className="ap-btn primary"
+              href={endpoint}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {chainLabel} ペイウォールを開いて決済する
+            </a>
+          ) : (
+            <p className="ap-muted">
+              {chainLabel} は手動 402 フローです。x402 対応クライアントから
+              X-PAYMENT を付与して再送するか、ファシリテーター経由で決済して
+              ください。
+            </p>
+          )}
         </div>
       ) : null}
 
